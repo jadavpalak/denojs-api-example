@@ -28,7 +28,6 @@ const getBooks = ({ response }: { response: any }) => {
 
 const getBook = ({ params, response }: { params: { isbn: string }; response: any }) => {
     const book: IBook | undefined = searchBookByIsbn(params.isbn)
-    console.log(book);
     if (book) {
         response.status = 200
         response.body = book

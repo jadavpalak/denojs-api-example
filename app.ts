@@ -1,6 +1,5 @@
 import { Application } from 'https://deno.land/x/oak/mod.ts'
 import router from './routes.ts'
-// import * from './.env'
 
 const env = Deno.env.toObject()
 const HOST ='127.0.0.1'
