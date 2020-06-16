@@ -1,3 +1,6 @@
+import { validate } from "https://deno.land/x/validasaur/src/mod.ts";
+import { required, isNumber,maxLength } from "https://deno.land/x/validasaur/src/rules.ts";
+
 interface IBook {
     isbn: string;
     author: string;
@@ -39,21 +42,43 @@ const getBook = ({ params, response }: { params: { isbn: string }; response: any
 
 const addBook = async ({ request, response }: { request: any; response: any }) => {
     const body = await request.body()
-    const book: IBook = body.value
-    books.push(book)
+	const [ passes, errors ] = await validate(body.value, {
+		isbn: [required,maxLength(6)],
+		author: [required,maxLength(10)],
+		title: [required,maxLength(10)]
+	});
+	
+	if(!passes){
+		response.body = errors;
+		response.status = 200
+	} else {
+	const book: IBook = body.value;
+	books.push(book)
     response.body = { message: 'OK' }
     response.status = 200
+	}
+    
 }
 
 const updateBook = async ({ params, request, response }: { params: { isbn: string }; request: any; response: any }) => {
     let book: IBook | undefined = searchBookByIsbn(params.isbn)
     if (book) {
-        const body = await request.body()
-        const updateInfos: { author?: string; title?: string } = body.value
-        book = { ...book, ...updateInfos }
-        books = [...books.filter(book => book.isbn !== params.isbn), book]
-        response.status = 200
-        response.body = { message: 'OK' }
+		const body = await request.body()
+		const [ passes, errors ] = await validate(body.value, {
+			isbn: [required,maxLength(6)],
+			author: [required,maxLength(10)],
+			title: [required,maxLength(10)]
+		});
+		if(!passes){
+			response.body = errors;
+			response.status = 200;
+		} else {
+			const updateInfos: { author?: string; title?: string } = body.value
+			book = { ...book, ...updateInfos }
+			books = [...books.filter(book => book.isbn !== params.isbn), book]
+			response.status = 200
+			response.body = { message: 'OK' }
+		}
     } else {
         response.status = 404
         response.body = { message: `Book not found` }
